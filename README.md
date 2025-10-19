@@ -27,7 +27,7 @@ when it finishes making the build files, build the executable!
 cmake --build build
 ```
 
-And done! you can run the executable with `./build/meltris`
+And done! you can find the binary in `build/bin`
 
 ## License
 This project is under the zlib license.
