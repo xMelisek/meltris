@@ -1,5 +1,5 @@
 #include <string>
-#include "../../include/glad.h"
+#include <glad.h>
 #include "assets.h"
 #include "shader.h"
 
