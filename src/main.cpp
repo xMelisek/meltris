@@ -1,32 +1,28 @@
 #define GLAD_GL_IMPLEMENTATION
 #include "../include/glad.h"
-#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
-
-#include <iostream>
-#include "../lib/glfw/deps/linmath.h"
-#include "util/shader.h"
 #include "util/util.h"
 
+#include <glm/glm.hpp>
+#include <glm/ext/matrix_transform.hpp>
+#include "util/shader.h"
+#include "util/math.h"
+#include <iostream>
+
 struct Vertex {
-  vec2 pos;
-  vec3 col;
+  glm::vec2 pos;
+  glm::vec3 col;
 };
 
-static const Vertex vertices[3] = {{{-0.6f, -0.4f}, {0.05f, 0.05f, 0.05f}},
-                                   {{0.6f, -0.4f}, {0.05f, 0.05f, 0.05f}},
-                                   {{0.f, 0.6f}, {0.05f, 0.05f, 0.05f}}};
+static const Vertex vertices[4] = {{{-0.5f, 0.5f}, {0.05f, 0.05f, 0.05f}},
+                                   {{0.5f, 0.5f}, {0.05f, 0.05f, 0.05f}},
+                                   {{0.5f, -0.5f}, {0.05f, 0.05f, 0.05f}},
+                                   {{-0.5f, -0.5f}, {0.05f, 0.05f, 0.05f}}};
 
-static void key_callback(GLFWwindow *window, int key, int scancode, int action,
-                         int mods) {
-  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-    glfwSetWindowShouldClose(window, GL_TRUE);
-}
-
-static void cursor_position_callback(GLFWwindow *window, double xpos,
-                                     double ypos) {
-  std::cout << "Position: " << xpos << "," << ypos << std::endl;
-}
+unsigned int indices[] = {
+    0, 1, 3,
+    1, 2, 3
+};
 
 static void error_callback(int error, const char *description) {
   fprintf(stderr, "Error: %s\n", description);
@@ -34,29 +30,22 @@ static void error_callback(int error, const char *description) {
 
 int main(void) {
   glfwSetErrorCallback(error_callback);
-  GLFWwindow* window;
+  GLFWwindow *window;
   if (!glfwInit()) {
-     perror("GLFW not initialized!");
-     exit(EXIT_FAILURE);
-   }
+    perror("GLFW not initialized!");
+    exit(EXIT_FAILURE);
+  }
 
-   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-   window = glfwCreateWindow(1280, 720, "Meltris", NULL, NULL);
-   if (!window) {
-     glfwTerminate();
-     exit(EXIT_FAILURE);
-   }
-
-   glfwSetKeyCallback(window, key_callback);
-   glfwSetCursorPosCallback(window, cursor_position_callback);
-
-   glfwMakeContextCurrent(window);
-   gladLoadGL(glfwGetProcAddress);
-   glfwSwapInterval(1);
-  util::init();
+  window = glfwCreateWindow(1280, 720, "Meltris", NULL, NULL);
+  if (!window) {
+    glfwTerminate();
+    exit(EXIT_FAILURE);
+  }
+  util::init(window);
 
   GLuint vertex_buffer;
   glGenBuffers(1, &vertex_buffer);
@@ -79,29 +68,38 @@ int main(void) {
   glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                         (void *)offsetof(Vertex, col));
 
+  GLuint EBO;
+  glGenBuffers(1, &EBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
   glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 
+  float lrp = 1.0f;
   while (!glfwWindowShouldClose(window)) {
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
     const float ratio = width / (float)height;
+    bool selected = false;
+    glm::vec2 ndcMousePos = (glm::vec2(util::getCursor().x / (float)width, util::getCursor().y / (float)height) - 0.5f) * 2.0f;
+    if(ndcMousePos.x > vertices[0].pos.x && ndcMousePos.x < vertices[1].pos.x && ndcMousePos.y < vertices[0].pos.y && ndcMousePos.y > vertices[3].pos.y)
+        selected = true;
 
     glViewport(0, 0, width, height);
     glClear(GL_COLOR_BUFFER_BIT);
 
     util::tick();
-    std::cout << "FPS: " << util::getFps() << std::endl;
+    std::cout << "FPS: " << round(util::getFps()) << std::endl;
 
-    mat4x4 m, p, mvp;
-    mat4x4_identity(m);
-    mat4x4_rotate_Z(m, m, (float)glfwGetTime());
-    mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
-    mat4x4_mul(mvp, p, m);
+    glm::mat4 mvp = glm::mat4(1.0f);
+    lrp = math::lerp(lrp, selected ? 1.2f : 1.0f, 0.2f * util::getDelta() * 60.0f);
+    mvp = glm::scale(mvp, glm::vec3(lrp));
 
     glUseProgram(program);
     glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat *)&mvp);
     glBindVertexArray(vertex_array);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     glfwSwapBuffers(window);
     glfwPollEvents();

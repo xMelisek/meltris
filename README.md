@@ -7,6 +7,15 @@ If you want, feel free to contribute to the project!
 > [!NOTE]
 > Currently i'm developing this on linux, so i can't be sure how other platforms might work
 
+Some basic packages you need in your linux environment:
+```
+cmake make gcc pkgconf
+```
+
+> [!NOTE]
+> Names might differ (like for `pkgconf` it might be `pkg-config`)
+
+
 First, you need to clone the project:
 ```
 git clone --recursive https://github.com/xMelisek/meltris
