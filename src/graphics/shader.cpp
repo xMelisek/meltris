@@ -1,6 +1,6 @@
 #include <string>
 #include <glad.h>
-#include "assets.h"
+#include "../util/assets.h"
 #include "shader.h"
 
 const GLuint compileShader(int shaderType, std::string path)

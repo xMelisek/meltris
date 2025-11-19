@@ -20,6 +20,7 @@ namespace engine {
 }
 
 GLFWwindow *window;
+Menu menu;
 
 static void errorCallback(int error, const char *description) {
   fprintf(stderr, "Error: %s\n", description);
@@ -62,7 +63,7 @@ void init() {
   gladLoadGL(glfwGetProcAddress);
   glfwSwapInterval(1); // Enable VSync
   glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-  menu::init(); // Temp hardcode
+  menu.init(); // Temp hardcode
   loop();
 }
 
@@ -70,7 +71,7 @@ void loop() {
   while (!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT);
     tick();
-    menu::draw(window); // Temp hardcode
+    menu.draw(window); // Temp hardcode
     glfwSwapBuffers(window);
     glfwPollEvents();
   }

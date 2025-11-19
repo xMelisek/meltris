@@ -8,9 +8,7 @@ add_subdirectory(lib/glfw)
 add_subdirectory(lib/glm)
 
 include_directories(${OPENGL_INCLUDE_DIRS})
-include_directories("glfw/deps")
 include_directories("include/")
-set(GLAD_GL "include/glad.h")
 
 file(GLOB SOURCES "src/*.cpp" "src/**/*.cpp")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
