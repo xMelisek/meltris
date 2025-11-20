@@ -21,9 +21,13 @@ std::string getExecPath() {
 #endif
 }
 
+std::string getExecDir() {
+	return getExecPath().substr(0, getExecPath().find_last_of("\\/") + 1);
+}
+
 std::string readFile(std::string path) {
   std::string fullPath =
-      getExecPath().substr(0, getExecPath().find_last_of("\\/") + 1) + path;
+      getExecDir() + path;
   std::string data = "";
   std::ifstream fileStream(fullPath);
   std::string raw;

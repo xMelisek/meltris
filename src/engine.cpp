@@ -83,7 +83,7 @@ void tick() {
   engine::rawfps = 1.0 / engine::delta;
   engine::fps = math::lerp(engine::fps, engine::rawfps, 0.2f * engine::delta * 60.f);
   engine::prevTime = glfwGetTime();
-  std::cout << "FPS: " << round(engine::fps) << std::endl;
+  // std::cout << "FPS: " << round(engine::fps) << std::endl;
 }
 
 void finish() {
