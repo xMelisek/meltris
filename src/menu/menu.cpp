@@ -10,7 +10,7 @@
 
   void Menu::init() {
   	quad = std::make_unique<Quad>(glm::vec2(0.0f), glm::vec2(1.0f), glm::vec3(0.15f));
-   quad2 = std::make_unique<Quad>(glm::vec2(0.75f), glm::vec2(0.2f), glm::vec3(1.f));
+   	quad2 = std::make_unique<Quad>(glm::vec2(0.75f), glm::vec2(0.2f), glm::vec3(1.f));
   }
 
   void Menu::draw(GLFWwindow *window) {
